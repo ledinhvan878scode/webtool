@@ -60,6 +60,23 @@ async def host(update: Update, context: ContextTypes.DEFAULT_TYPE):
     output = run_cmd(["host", user_input])
     await update.message.reply_text(f"Host 查询结果:\n{output}")
 
+# /whois 命令
+async def whois(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_input = " ".join(context.args)
+    log_input(update.effective_user.id, f"/whois {user_input}")
+
+    if not user_input:
+        await update.message.reply_text("用法: /whois <domain>")
+        return
+
+    output = run_cmd(["whois", user_input])
+
+    # Telegram 单条消息有长度限制
+    if len(output) > 4000:
+        output = output[:4000] + "\n\n[输出过长，已截断]"
+
+    await update.message.reply_text(f"Whois 查询结果:\n{output}")
+
 async def traceroute(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_input = " ".join(context.args)
     log_input(update.effective_user.id, f"/traceroute {user_input}")
@@ -105,7 +122,7 @@ def main():
     app.add_handler(CommandHandler("host", host))
     app.add_handler(CommandHandler("traceroute", traceroute))
     app.add_handler(CommandHandler("nslookup", nslookup))
-
+    app.add_handler(CommandHandler("whois", whois))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
     app.run_polling()
